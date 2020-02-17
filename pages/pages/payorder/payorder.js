@@ -4,6 +4,12 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _config = require('../../../config.js');
+
+var _config2 = _interopRequireDefault(_config);
+
+var mendian_type = _config2.default.mendian_type;
+
 var _urls = require("../../modules/urls.js");
 
 var _urls2 = _interopRequireDefault(_urls);
@@ -29,6 +35,7 @@ exports.default = Page({
         confirm: false,
         //isNeedLogistics: 0, 
         allGoodsPrice: 0,
+        score_needs: 0,
         yunPrice: 0,
         allGoodsAndYunPrice: 0,
         goodsJsonStr: "",
@@ -42,12 +49,14 @@ exports.default = Page({
         couponstype: null,
         shopsName: '请选择自提门店',
         couponsName: '请选择优惠券',
-        wuLiuName: "\u8BF7\u9009\u62E9\u914D\u9001\u65B9\u5F0F"
+        wuLiuName: "\u8BF7\u9009\u62E9\u914D\u9001\u65B9\u5F0F",
+        ptime: '12:01',
+        tmpids:{}
     },
     onShow: function onShow() {
         var that = this;
         var shopList = [];
-        if ("buyNow" == that.data.orderType) {
+        if (that.data.orderType == 'buyNow') {
             var buyNowInfoMem = wx.getStorageSync('__buyNowInfo');
             if (buyNowInfoMem && buyNowInfoMem.shopList) {
                 shopList = buyNowInfoMem.shopList;
@@ -63,12 +72,37 @@ exports.default = Page({
         that.setData({ goodsList: shopList });
         that.initShippingAddress();
     },
+    accepttongzhi(e){
+        var that = this;
+        let tmpids=that.data.tmpids
+        let cancel_id=tmpids['cancel_id']
+        let send_id=tmpids['send_id']
+        let evaluate_id=tmpids['evaluate_id']
+        //console.log(cancel_id,send_id)
+        wx.requestSubscribeMessage({
+          tmplIds: [cancel_id,send_id,evaluate_id],
+          success(res) { }
+        })
+      },
     onLoad: function onLoad(e) {
         var that = this;
         var token = wx.getStorageSync('__appUserInfo').token;
         if (e.orderType) {
-            this.setData({ orderType: e.orderType });
+            that.setData({ orderType: e.orderType });
         }
+        if (e.ktid) {
+            that.setData({
+                ktid: e.ktid,
+                ktype: e.ktype
+            });
+        }
+        if (wx.IPHONEX == 0) {
+            that.setData({ iphonex: true });
+        }
+        that.zitiShippingList();
+    },
+    zitiShippingList: function zitiShippingList() {
+        var that = this;
         //获取商铺列表
         _server2.default.get(_urls2.default.links[0].mlshopslis, {}).then(function (res) {
             if (res.code == 0) {
@@ -102,9 +136,6 @@ exports.default = Page({
                 }
             }
         });
-        if (wx.IPHONEX == 0) {
-            that.setData({ iphonex: true });
-        }
     },
     initShippingAddress: function initShippingAddress() {
         var that = this;
@@ -178,14 +209,14 @@ exports.default = Page({
             remark = e.detail.value.remark;
         }
         var postData = {
-            ctype: 0,
             viewid: 'home',
             part: 'order_create',
             token: loginToken,
             goodsJsonStr: that.data.goodsJsonStr,
             kuaid: that.data.inlineDescListKey,
             coupon_id: that.data.coupon_id,
-            remark: remark
+            remark: remark,
+            ptime: that.data.ptime
         };
         //上门自提 & 无须配送
         if (that.data.inlineDescListKey >= 1) {
@@ -263,6 +294,46 @@ exports.default = Page({
             });
             return;
         } else {
+            //////////////////////////自提增加地址start
+          if (mendian_type==1){
+            if (!that.data.curAddressData) {
+              wx.showConfirm({
+                content: "\u8BF7\u5148\u8BBE\u7F6E\u60A8\u7684\u6536\u8D27\u5730\u5740\uFF01",
+                cancelColor: "#999999",
+                confirmColor: "#ffd305",
+                confirmText: "\u7ACB\u5373\u8BBE\u7F6E",
+                cancelText: "\u7A0D\u540E\u8BBE\u7F6E",
+                success: function success(res) {
+                  if (res.confirm) {
+                    wx.navigateTo({
+                      url: "/pages/pages/user/address/address"
+                    });
+                  }
+                }
+              });
+              return;
+            }
+            //收货人姓名
+            postData.name = that.data.curAddressData.name;
+            //收货人手机/电话
+            postData.phone = that.data.curAddressData.phone;
+            //收货人省
+            postData.province = that.data.curAddressData.province;
+            //收货人市
+            postData.city = that.data.curAddressData.city;
+            //收货人区
+            if (that.data.curAddressData.district) {
+              postData.district = that.data.curAddressData.district;
+            }
+            //收货人街道地址
+            postData.address = that.data.curAddressData.address;
+            //收货人邮编
+            if (that.data.curAddressData.code) {
+              postData.code = that.data.curAddressData.code;
+            }
+          }
+            
+            ////////////////////////////// 自提增加地址end
             postData.mendian_id = that.data.mendian_id;
         }
         if (that.data.coupon_id != 0) {
@@ -275,8 +346,47 @@ exports.default = Page({
         } else {
             postData.formId = e.detail.formId;
         }
+        if (that.data.ktype == 0) {
+            //开团订单
+            postData.ctype = 2;
+            postData.ptype = 0;
+            postData.ptkid = that.data.ktid;
+        } else if (that.data.ktype == 1) {
+            //参团订单
+            postData.ctype = 2;
+            postData.ptype = 1;
+            postData.ptkid = that.data.ktid;
+        } else {
+            //普通订单
+            postData.ctype = 0;
+        }
         _server2.default.post(_urls2.default.links[0].ordecreate, postData).then(function (res) {
-            if (res.code == 701) {
+          //console.log(res)
+          if (res.code != 0) {
+            wx.showConfirm({
+              content: res.msg,
+              cancelColor: "#999999",
+              confirmColor: "#ffd305",
+              success: function success(res) { }
+            });
+            that.setData({
+              allGoodsPrice: res.data.goods_price,
+              score_needs: res.data.score_needs,
+              allGoodsAndYunPrice: res.data.total,
+              yunPrice: res.data.yunfei_price,
+              VipGoodsPrice: res.data.vip_price,
+              VipGoodsAndYunPrice: res.data.vip_total,
+              ViplevelName: res.data.vip_level_name,
+              VipSale: res.data.vip_sale,
+              VipState: res.data.vip_state,
+              VipSmallMoney: res.data.vip_small,
+              allMoney: res.data.money,
+              orderfrom: res.data,
+              tmpids:res.data.TmplIds
+            });
+            return;
+          }
+            /*if (res.code == 701) {
                 wx.showConfirm({
                     content: "\u60A8\u7684\u8D26\u6237\u5DF2\u7ECF\u88AB\u7981\u7528\uFF0C\u4E0D\u80FD\u521B\u5EFA\u8BA2\u5355\r\n\u5982\u6709\u7591\u95EE\uFF0C\u8BF7\u8054\u7CFB\u5BA2\u670D\u5DE5\u4F5C\u4EBA\u5458",
                     cancelColor: "#999999",
@@ -285,6 +395,15 @@ exports.default = Page({
                 });
                 return;
             }
+            if (res.code == 307) {
+                wx.showConfirm({
+                    content: "\u5DF2\u6709\u672A\u5B8C\u6210\u7684\u62FC\u56E2\u8BA2\u5355\uFF0C\u8BF7\u7EE7\u7EED\u4E4B\u524D\u7684\u62FC\u56E2",
+                    cancelColor: "#999999",
+                    confirmColor: "#ffd305",
+                    success: function success(res) {}
+                });
+                return;
+            }*/
             if (res.code == 0) {
                 if (e && "buyNow" != that.data.orderType) {
                     wx.removeStorageSync('__shopCarInfo');
@@ -292,6 +411,7 @@ exports.default = Page({
                 if (!e) {
                     that.setData({
                         allGoodsPrice: res.data.goods_price,
+                        score_needs: res.data.score_needs,
                         allGoodsAndYunPrice: res.data.total,
                         yunPrice: res.data.yunfei_price,
                         VipGoodsPrice: res.data.vip_price,
@@ -301,7 +421,8 @@ exports.default = Page({
                         VipState: res.data.vip_state,
                         VipSmallMoney: res.data.vip_small,
                         allMoney: res.data.money,
-                        orderfrom: res.data
+                        orderfrom: res.data,
+                        tmpids:res.data.TmplIds
                     });
                     that.getMyCoupons();
                     return;
@@ -310,6 +431,12 @@ exports.default = Page({
                     if (e && userid) {
                         wx.removeStorageSync('__appInviter');
                     }
+                }
+                if (that.data.ktype) {
+                    wx.redirectTo({
+                        url: "/pages/pages/payorder/paypal/paypal?id=" + res.data.order_number + '&pt=2'
+                    });
+                    return;
                 }
                 wx.redirectTo({
                     url: "/pages/pages/payorder/paypal/paypal?id=" + res.data.order_number
@@ -388,6 +515,54 @@ exports.default = Page({
         });
         that.createOrder();
     },
+    formCouponsAdd: function formCouponsAdd(e) {
+        var that = this;
+        var token = wx.getStorageSync('__appUserInfo').token;
+        var number = e.detail.value.number;
+        if (!number) {
+            wx.showModal({
+                content: '如有优惠码，请输入',
+                showCancel: false
+            });
+            return;
+        }
+        _server2.default.get(_urls2.default.links[0].getcoupons, { token: token, key: number }).then(function (res) {
+            if (res.code == 0) {
+                wx.showToast({
+                    title: "\u5151\u6362\u6210\u529F",
+                    icon: 'success',
+                    mask: true,
+                    duration: 1000
+                });
+                self.setData({ cValue: '' });
+                that.getMyCoupons();
+            }
+            if (res.code == 200) {
+                wx.showConfirm({
+                    content: "\u4F18\u60E0\u5238\u53E3\u4EE4\u4E0D\u6B63\u786E\r\n\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u8F93\u5165",
+                    showCancel: false,
+                    confirmColor: '#ffd305',
+                    confirmText: "\u6211\u77E5\u9053\u4E86"
+                });
+            }
+            if (res.code == 300) {
+                wx.showConfirm({
+                    content: "\u60A8\u5DF2\u9886\u8FC7\u6B64\u4F18\u60E0\u5238\r\n\u4E0D\u80FD\u5728\u8FDB\u884C\u5151\u6362\u4E86",
+                    showCancel: false,
+                    confirmColor: '#ffd305',
+                    confirmText: "\u6211\u77E5\u9053\u4E86"
+                });
+            }
+            if (res.code == 301) {
+                wx.showConfirm({
+                    content: "\u4F18\u60E0\u5238\u5DF2\u7ECF\u9886\u5B8C\u4E86\r\n\u4E0B\u6B21\u8981\u65E9\u70B9\u6765\u54E6\uFF5E",
+                    showCancel: false,
+                    confirmColor: '#ffd305',
+                    confirmText: "\u6211\u77E5\u9053\u4E86"
+                });
+            }
+        });
+    },
     getPayPalTap: function getPayPalTap() {
         wx.navigateTo({
             url: "/pages/pages/user/paypal/paypal"
@@ -400,5 +575,12 @@ exports.default = Page({
     },
     navigateBack: function navigateBack() {
         wx.navigateBack();
+    },
+   
+    bindTimeChange: function (e) {
+      //console.log('picker发送选择改变，携带值为', e.detail.value)
+      this.setData({
+        ptime: e.detail.value
+      })
     }
 });

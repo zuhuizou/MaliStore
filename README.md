@@ -1,14 +1,34 @@
-# [码力小店 MaliStore+][1]
-![码力小店，MaliStore+][2]
+# [简道云之家][1]
+![简道云之家][2]
 
-## 小店说明
-目前开源的小程序商城有很多，但真正能上线使用的没几个，就算能上线使用做的也相对比较粗糙。码力小店更注重前端用户体验，在用户视觉和交互方面做了很多改进。 功能方面目前优惠券、会员、自提、人人分销、售后等功能，更多更能正在陆续添加中，欢迎Star～
-> 当前开源的是码力小店微信小程序端，可以搭配[码力小店][3]服务端使用。
-> 拼团砍价版本的小程序不在GitHub开源，使用GitHub上的代码上线运营后将会获得拼团砍价版的权限；
 
-## 小店功能
+
+## 更新日志  2020-02-01 (请注意，开源协议为GPL V2)
+
+2020-02-01
+更新到V1.5.3,对应后台提供的货到付款配送方式，小程序提供订单在待配送状态取消订单
+
+2020-01-27
+修改会员页面显示文字,修改config.py的域名链接
+
+2020-01-21
+修复订单评价的bug
+
+2020-01-21
+更新到V1.5.2,增加订阅消息处理
+
+2019-12-22
+更新到V1.5.1,与后台同步更新，对下单返回信息直接提示后台返回内容,增加积分抵扣购买商品功能
+
+## 说明
+目前开源的小程序商城有很多，但真正能上线使用的没几个，就算能上线使用做的也相对比较粗糙。码力小店更注重前端用户体验，在用户视觉和交互方面做了很多改进。 功能方面目前优惠券、会员、自提、人人分享、售后等功能，更多更能正在陆续添加中，欢迎Star～
+> 当前开源的是码力小店微信小程序端，可以搭配[YJYZJ][3]服务端使用。
+> 此处开源最新的全功能版本；
+
+## 功能
 - [x] 优惠券
     *【支持满减、折扣、积分兑换、口令兑换等类型的优惠券发放】*
+    *【后台主动发放】*
 - [x] 会员
     *【支持付费升级或者购物升级方式，可以任意切换】*
 - [x] 每日签到
@@ -17,7 +37,7 @@
     *【带动用户消费，让你能提前收益】*
 - [x] 订单代付
     *【促进用户交易提高付款率】*
-- [x] 人人分销
+- [x] 人人分享
     *【可以设置分享返或者下单返，返现金、积分、优惠券】*
 - [x] 门店自提
     *【支持多门店，用户下单时可选择自提门店】*
@@ -33,28 +53,14 @@
     *【方便收集用户的建议或意见】*
 - [x] 拼团
     *【最重要营销手段之一，吸引用户购买，提高曝光度】*
+- [x] 积分抵扣
+    *【用户可以利用在小程序得到的积分购买商品】*
     
-## 正在开发
-- [x] 砍价
-
-## 预计开发
-- [ ] 心愿单
-- [ ] 购物单
-- [ ] 转盘抽奖
-
-## 问题反馈
-扫描微信二维码，添加 [**码力小助手（WeChatID: kutche）**][4] 为联系人
-发送消息“**码力小店**”，即可获取最新的微信群二维码
- 
-如果你在配置过程中遇到问题或者有更好的开发建议
-请在群内反馈交流。
-
-![此处输入图片的描述][5]
 
 ## License
-MIT License
+GPL V2 License
  
-Copyright (c) 2018 O2Team
+Copyright (c) 2018 O1Team
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  
@@ -65,8 +71,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 你可以免费使用、修改、发布、分发该软件，但需要保留小程序底部的版权信息（码力小店logo等字样）。
 
 
-  [1]: https://www.maliapi.com/
-  [2]: https://xiaodu.maliapi.com/static/data/5da8f63d1cfe8b23abd7bcdc42d9131a.jpg
-  [3]: https://www.maliapi.com/
-  [4]: https://xiaodu.maliapi.com/static/data/510b3dc7c4d1a29f573384ef97688dd1.png
-  [5]: https://xiaodu.maliapi.com/static/data/510b3dc7c4d1a29f573384ef97688dd1.png
+  [1]: https://www.yjyzj.cn/
+  [2]: https://github.com/mn3711698/MaliStore/blob/master/1.jpg
+  [3]: https://store.yjyzj.cn/
+  [5]: https://github.com/mn3711698/MaliStore/blob/master/wechat.jpg

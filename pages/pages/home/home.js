@@ -32,6 +32,7 @@ exports.default = Page({
     var that = this;
     //轮播幻灯片
     _server2.default.get(_urls2.default.links[0].imgsbanner, { type: 'home' }).then(function (res) {
+      //console.log(res,'000000000')
       if (res.code == 0) {
         that.setData({ home: res.data });
       }
@@ -42,9 +43,17 @@ exports.default = Page({
         that.setData({ sale: res.data });
       }
     });
+    //获取推荐拼团商品
+    _server2.default.get(_urls2.default.links[0].recptgoods, {}).then(function (res) {
+      //console.log(res)
+      that.setData({
+        ptGoodsList: res.data
+      });
+    });
     //专题板块
     wx.nextTick(function () {
       _server2.default.get(_urls2.default.links[0].mlcategory, { type: 'home' }).then(function (res) {
+        //console.log(res)
         if (res.code == 0) {
           that.setData({ category: res.data });
           var goods = {};
@@ -103,12 +112,12 @@ exports.default = Page({
       success: function success(res) {
         if (res.data) {
           if (res.data.shopNum > 0) {
-            wx.showTabBarRedDot({ index: 2 });
+            wx.showTabBarRedDot({ index: 3 });
           } else {
-            wx.removeTabBarBadge({ index: 2 });
+            wx.removeTabBarBadge({ index: 3 });
           }
         } else {
-          wx.removeTabBarBadge({ index: 2 });
+          wx.removeTabBarBadge({ index: 3 });
         }
       }
     });
@@ -161,9 +170,9 @@ exports.default = Page({
     _server2.default.get(_urls2.default.links[0].orderstats, { token: token }).then(function (res) {
       if (res.code == 0) {
         if (res.data.nopaypal > 0) {
-          wx.showTabBarRedDot({ index: 3 });
+          wx.showTabBarRedDot({ index: 4 });
         } else {
-          wx.removeTabBarBadge({ index: 3 });
+          wx.removeTabBarBadge({ index: 4 });
         }
       }
     });
@@ -294,6 +303,11 @@ exports.default = Page({
     var name = e.currentTarget.dataset.name;
     wx.navigateTo({
       url: "/pages/pages/menu/list/list?id=" + cid + '&pid=' + pid + '&name=' + name
+    });
+  },
+  getPingtuanListTap: function getPingtuanListTap() {
+    wx.navigateTo({
+      url: "/pages/pages/menu/pingtuan/pingtuan"
     });
   }
 
